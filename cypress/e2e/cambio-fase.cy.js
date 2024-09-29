@@ -22,5 +22,20 @@ describe('LTI Homepage Navigation', () => {
       cy.get('.card-body').contains('John Doe')
       cy.get('.card-body').contains('Jane Smith')
     })
+
+    cy.intercept('PUT', '/candidates/*').as('updateCandidateStage')
+
+    cy.get('[data-rbd-draggable-id="3"]').dragAndDrop(
+      '[data-rbd-draggable-id="3"]',
+      '[data-rbd-droppable-id="1"]'
+    );
+
+    // Verificar que "Carlos García" ahora está en la fase "Technical Interview"
+    cy.get('.card-header:contains("Technical Interview")').parent().within(() => {
+      cy.get('.card-body').contains('Carlos García')
+    })
+
+    // Verificar que se hizo una llamada al endpoint PUT /candidates/:id
+    cy.wait('@updateCandidateStage').its('response.statusCode').should('eq', 200)
   })
 })
